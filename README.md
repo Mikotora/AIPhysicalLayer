@@ -1,5 +1,7 @@
 # AIPhysicalLayer
 
+[日本語の説明は下にあります](#日本語)
+
 AIPhysicalLayer is a local physical-device layer for AI clients. It provides one vendor-neutral model for capabilities, observed state, and explicitly requested actions, then exposes that model through REST and MCP adapters.
 
 The default adapter is an in-memory Mock. A Nature Remo adapter is included for users who configure their own account, local bindings, authentication boundaries, and action policy.
@@ -120,6 +122,29 @@ This public copy intentionally omits household-specific acceptance logs and real
 Do not expose ports `8787`, `8791`, `8792`, or `8794` directly to the Internet. Review the exact authentication and forwarding boundary before exposing the `8790` gateway.
 
 If you discover a security issue, do not include tokens, keys, personal information, logs, or live URLs in a public issue.
+
+## 日本語
+
+AIPhysicalLayer（AI共通身体層）は、AIが家の家電を「読む」「動かす」ための、特定のAI会社に縛られない共通の層です。ChatGPT、Claude、Grokなど、どのAIからも同じ形で、次の3つを扱えるようにします。
+
+- 何ができるか（能力）
+- 今どうなっているか（状態）
+- 何をしてほしいか（操作）
+
+### 大事にしていること
+
+- **見えないものを、見えたことにしない**：観測できた値と「分からない（unknown）」を分けて返します。最後に送った命令（last_command）は、今の状態の証拠としては扱いません。
+- **勝手に送り直さない**：失敗した命令や、結果が分からない命令は、自動で再送しません。同じ依頼の二重送信も防ぎます。
+- **止めるより、伝えながら動く**：記録を保存できない時も操作は続けます。ただし、その事実をAIが必ず人に伝えられる形で返します。
+- **判断は人に残す**：AIをつないだことは、何でも動かしてよいという許可ではありません。
+
+### はじめかた
+
+まずはMock（模擬）モードで試してください。本物の家電にはつながりません。手順は英語の「Quick start: Mock only」を参照してください。
+
+### 注意
+
+これは実験的な実装で、安全性の認証を受けた制御システムではありません。本物の家電につなぐ前に、ご自分の環境で設定、認証、ログ、失敗した時の動きを確かめてください。鍵、トークン、ログ、家電のIDなどは公開しないでください。
 
 ## License
 

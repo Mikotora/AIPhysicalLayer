@@ -1,0 +1,24 @@
+#!/bin/sh
+set -eu
+
+repo_root=$(git rev-parse --show-toplevel)
+project_root="$repo_root"
+bundled_node="${HOME}/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node"
+
+if [ -x "$bundled_node" ]; then
+  node_binary="$bundled_node"
+elif command -v node >/dev/null 2>&1; then
+  node_binary=$(command -v node)
+else
+  echo "personal-info check could not run: Node.js 24 or later is required" >&2
+  exit 2
+fi
+
+"$node_binary" "$project_root/scripts/check-personal-info.ts" --staged
+
+if ! command -v gitleaks >/dev/null 2>&1; then
+  echo "secret scan could not run: install gitleaks before committing" >&2
+  exit 2
+fi
+
+exec gitleaks git --pre-commit --redact --staged --verbose

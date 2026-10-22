@@ -1,0 +1,13 @@
+# Replace the placeholder email only in an ignored private copy.
+# Review current ngrok Traffic Policy syntax before deploying this example.
+on_http_request:
+  - expressions:
+      - "!(req.url.path.startsWith('/ai/v1/') || req.url.path in ['/mcp', '/.well-known/oauth-protected-resource', '/.well-known/oauth-protected-resource/mcp', '/.well-known/oauth-authorization-server', '/.well-known/openid-configuration', '/oauth/authorize', '/oauth/token', '/oauth/register', '/oauth/google/callback', '/oauth/consent'])"
+    actions:
+      - type: oauth
+        config:
+          provider: google
+  - expressions:
+      - "!(req.url.path.startsWith('/ai/v1/') || req.url.path in ['/mcp', '/.well-known/oauth-protected-resource', '/.well-known/oauth-protected-resource/mcp', '/.well-known/oauth-authorization-server', '/.well-known/openid-configuration', '/oauth/authorize', '/oauth/token', '/oauth/register', '/oauth/google/callback', '/oauth/consent']) && !(actions.ngrok.oauth.identity.email in ['operator@example.invalid'])"
+    actions:
+      - type: deny

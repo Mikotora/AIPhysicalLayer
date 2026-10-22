@@ -1,0 +1,33 @@
+{
+  "name": "ai-physical-layer",
+  "version": "0.3.0",
+  "private": true,
+  "type": "module",
+  "description": "Common AI physical capability, state and action layer with Mock and Nature adapters",
+  "scripts": {
+    "start": "node src/server.ts",
+    "start:off-entry": "node src/off-entry.ts",
+    "start:mcp": "node src/mcp-server.ts",
+    "start:remote-mcp": "node remote-mcp-gateway/src/server.ts",
+    "service:start": "node scripts/service.ts start",
+    "service:stop": "node scripts/service.ts stop",
+    "service:status": "node scripts/service.ts status",
+    "service:doctor": "node scripts/service.ts doctor",
+    "service:intent": "node scripts/service.ts intent:new",
+    "client:key": "node scripts/client-key.ts",
+    "discover:nature": "node scripts/discover-nature.ts",
+    "bindings:refresh": "node scripts/refresh-nature-bindings.ts",
+    "verify:ai-direct": "node scripts/verify-ai-direct.ts",
+    "verify:ai-boundary": "node scripts/verify-ai-action-boundary.ts",
+    "verify:mcp:read": "node scripts/verify-mcp-read.ts",
+    "check:personal-info": "node scripts/check-personal-info.ts --tracked",
+    "test": "node --test tests/*.test.ts && node --test remote-mcp-gateway/tests/*.test.ts"
+  },
+  "engines": {
+    "node": ">=24"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.31.0",
+    "zod": "^4.6.5"
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "name": "ai-physical-layer-remote-mcp-gateway",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "OAuth-protected Remote MCP common gateway for AIPhysicalLayer",
+  "scripts": {
+    "start": "node src/server.ts",
+    "test": "node --test tests/*.test.ts"
+  },
+  "engines": {
+    "node": ">=24"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/node": "2.1.1",
+    "@modelcontextprotocol/server": "2.3.1",
+    "jose": "6.2.12",
+    "zod": "4.6.5"
+  }
+}

@@ -1,0 +1,284 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "AI Common Physical Layer",
+    "description": "Read shared physical capabilities and current state, and execute only catalog-approved physical actions. Authentication is configured separately in ChatGPT and is never supplied as a tool argument.",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://your-deployment.example"
+    }
+  ],
+  "paths": {
+    "/ai/v1/capabilities": {
+      "get": {
+        "operationId": "getPhysicalCapabilities",
+        "summary": "何ができるかを見る",
+        "description": "Return common device capabilities, readable fields, allowed actions, and each action's parameter contract. Call this before every parameterized or multi-step operation. This is read-only and does not report current device state.",
+        "x-openai-isConsequential": false,
+        "responses": {
+          "200": {
+            "description": "Common capability catalog",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CapabilityDocument"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        }
+      }
+    },
+    "/ai/v1/state": {
+      "get": {
+        "operationId": "getPhysicalState",
+        "summary": "現在状態を見る",
+        "description": "Return observed and unknown device state, independent last-command history, and shared environmental perceptions. Use this for every current-state, temperature, or humidity question. Never infer an unknown field from last_command.",
+        "x-openai-isConsequential": false,
+        "responses": {
+          "200": {
+            "description": "Current common state snapshot",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StateDocument"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        }
+      }
+    },
+    "/ai/v1/actions": {
+      "post": {
+        "operationId": "executePhysicalAction",
+        "summary": "許可済みの操作を実行する",
+        "description": "Execute one requested catalog action per call. Run multi-step requests sequentially with a fresh Idempotency-Key per action. An explicit repeat is a new intent with a new key. Reuse a key only for an exact transport retry. Never retry an unknown outcome automatically. If recording.status is temporary, explicitly relay its warning to the user.",
+        "x-openai-isConsequential": true,
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "description": "Opaque unique key for this user intent. Use 8-128 ASCII letters, digits, dot, underscore, colon, or hyphen.",
+            "schema": {
+              "type": "string",
+              "minLength": 8,
+              "maxLength": 128,
+              "pattern": "^[A-Za-z0-9._:-]+$"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ActionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Previously completed result replayed without sending the device operation again",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ActionResult"
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "New action completed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ActionResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Rejected"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "502": {
+            "description": "Core unavailable or outcome cannot be established. Do not retry automatically.",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "CapabilityDocument": {
+        "type": "object",
+        "required": ["schema_version", "devices", "perceptions", "execution_policy"],
+        "properties": {
+          "schema_version": { "type": "string" },
+          "devices": { "type": "array", "items": { "type": "object", "additionalProperties": true } },
+          "perceptions": { "type": "array", "items": { "type": "object", "additionalProperties": true } },
+          "execution_policy": { "type": "object", "additionalProperties": true }
+        },
+        "additionalProperties": false
+      },
+      "StateDocument": {
+        "type": "object",
+        "required": ["schema_version", "observed_at", "devices", "perceptions"],
+        "properties": {
+          "schema_version": { "type": "string" },
+          "observed_at": { "type": "string", "format": "date-time" },
+          "devices": { "type": "array", "items": { "type": "object", "additionalProperties": true } },
+          "perceptions": { "type": "array", "items": { "type": "object", "additionalProperties": true } }
+        },
+        "additionalProperties": false
+      },
+      "ActionRequest": {
+        "type": "object",
+        "required": ["action_id", "parameters"],
+        "properties": {
+          "action_id": {
+            "type": "string",
+            "description": "Common action identifier selected from the current capability response.",
+            "enum": [
+              "light.living_room.on",
+              "light.living_room.off",
+              "light.living_room.full",
+              "light.living_room.favorite",
+              "light.living_room.night",
+              "light.living_room.brighten",
+              "light.living_room.dim",
+              "light.living_room.warmer",
+              "light.living_room.cooler",
+              "light.living_room.mode.reading",
+              "light.living_room.mode.dining",
+              "light.living_room.mode.relaxing",
+              "light.room.cycle",
+              "climate.room.on",
+              "climate.room.off",
+              "climate.room.set_mode",
+              "climate.room.set_temperature",
+              "climate.room.set_fan_speed",
+              "climate.room.set_vertical_direction",
+              "climate.room.set_horizontal_direction",
+              "climate.living_room.on",
+              "climate.living_room.off",
+              "climate.living_room.set_mode",
+              "climate.living_room.set_temperature",
+              "climate.living_room.set_fan_speed",
+              "media.tv.power_toggle",
+              "media.tv.input.next",
+              "media.tv.input.select",
+              "media.tv.channel.select",
+              "media.tv.channel.next",
+              "media.tv.channel.previous",
+              "media.tv.volume.up",
+              "media.tv.volume.down",
+              "media.tv.mute_toggle",
+              "media.tv.color.blue",
+              "media.tv.color.red",
+              "media.tv.color.green",
+              "media.tv.color.yellow",
+              "media.tv.navigate",
+              "media.tv.playback",
+              "media.tv.function",
+              "appliance.generic.dehumidify.high",
+              "appliance.generic.dehumidify.normal",
+              "appliance.generic.dehumidify.low",
+              "appliance.generic.laundry",
+              "appliance.generic.high_power",
+              "appliance.generic.heat_sterilize",
+              "appliance.generic.filter_clean"
+            ]
+          },
+          "parameters": {
+            "$ref": "#/components/schemas/ActionParameters"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ActionParameters": {
+        "type": "object",
+        "description": "Use only fields declared for the selected action in getPhysicalCapabilities. Parameterless actions use an empty object.",
+        "properties": {
+          "mode": { "type": "string", "enum": ["auto", "fan", "cool", "dry", "heat"] },
+          "value": { "oneOf": [{ "type": "number" }, { "type": "string" }] },
+          "input": { "type": "string", "enum": ["terrestrial", "bs", "cs"] },
+          "channel": { "type": "integer", "minimum": 1, "maximum": 12 },
+          "key": {
+            "type": "string",
+            "enum": ["left", "up", "right", "down", "ok", "back", "menu", "exit", "rewind", "play", "record", "fast_forward", "previous", "pause", "stop", "next", "recordings", "timer", "subtitle", "submenu", "schedule", "audio", "display", "data"]
+          }
+        },
+        "additionalProperties": false
+      },
+      "ActionResult": {
+        "type": "object",
+        "required": ["command_id", "status", "action_id", "device", "action", "adapter", "adapter_state"],
+        "properties": {
+          "command_id": { "type": "string" },
+          "status": { "type": "string", "enum": ["succeeded"] },
+          "action_id": { "type": "string" },
+          "device": { "type": "string" },
+          "action": { "type": "string" },
+          "adapter": { "type": "string" },
+          "adapter_state": { "type": "object", "additionalProperties": true },
+          "replayed": { "type": "boolean" },
+          "recording": { "$ref": "#/components/schemas/TemporaryRecording" }
+        },
+        "additionalProperties": true
+      },
+      "TemporaryRecording": {
+        "type": "object",
+        "required": ["status", "persistent", "store", "duplicate_prevention", "valid_until", "must_tell_user", "message"],
+        "properties": {
+          "status": { "type": "string", "enum": ["temporary"] },
+          "persistent": { "type": "boolean", "const": false },
+          "store": { "type": "string", "enum": ["memory"] },
+          "duplicate_prevention": { "type": "string", "enum": ["temporary"] },
+          "valid_until": { "type": "string", "enum": ["core_process_or_mac_restart"] },
+          "must_tell_user": { "type": "boolean", "const": true },
+          "message": { "type": "string" }
+        },
+        "additionalProperties": false
+      },
+      "Error": {
+        "type": "object",
+        "required": ["error"],
+        "properties": {
+          "error": { "type": "string" },
+          "outcome": { "type": "string" },
+          "recording": { "$ref": "#/components/schemas/TemporaryRecording" }
+        },
+        "additionalProperties": false
+      }
+    },
+    "responses": {
+      "Unauthorized": {
+        "description": "Client authentication failed",
+        "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } }
+      },
+      "Rejected": {
+        "description": "Action, parameters, or intent key rejected before unsupported execution",
+        "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } }
+      }
+    }
+  }
+}

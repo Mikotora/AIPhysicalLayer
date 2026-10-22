@@ -1,0 +1,21 @@
+{
+  "publicOrigin": "https://your-deployment.example",
+  "ngrok": {
+    "binary": "ngrok",
+    "upstream": "http://127.0.0.1:8790",
+    "apiUrl": "http://127.0.0.1:4040",
+    "trafficPolicyFile": "config/ngrok-traffic-policy.yml"
+  },
+  "secureMcpTunnel": {
+    "binary": ".runtime/bin/tunnel-client",
+    "profileFile": ".runtime/tunnel-client/profiles/ai-physical-layer.yaml",
+    "healthUrl": "http://127.0.0.1:8793"
+  },
+  "remoteMcpGateway": {
+    "enabled": false,
+    "configFile": "remote-mcp-gateway/config/remote-mcp-gateway.json",
+    "coreTokenFile": ".runtime/secrets/remote-mcp-gateway.key",
+    "databaseFile": "data/remote-mcp-gateway.sqlite",
+    "auditLogFile": "data/remote-mcp-access.jsonl"
+  }
+}

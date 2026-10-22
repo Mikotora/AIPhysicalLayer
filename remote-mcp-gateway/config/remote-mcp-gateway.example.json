@@ -1,0 +1,18 @@
+{
+  "allowedGoogleSub": "replace-with-the-one-allowed-google-sub",
+  "googleClientId": "replace-with-the-dedicated-google-oauth-client-id",
+  "bootstrapApprovedRedirectUris": [
+    "https://claude.ai/api/mcp/auth_callback"
+  ],
+  "accessTokenTtlSeconds": 3600,
+  "refreshTokenTtlSeconds": 2592000,
+  "authorizationCodeTtlSeconds": 300,
+  "pendingClientTtlSeconds": 3600,
+  "maxClients": 10,
+  "maxPendingClients": 10,
+  "registrationRateLimitPerHour": 20,
+  "oauthRateLimitPerMinute": 60,
+  "keychainService": "AIPhysicalLayer.remote-mcp-gateway",
+  "googleClientSecretAccount": "google-client-secret",
+  "googleRefreshTokenAccount": "google-refresh-token"
+}

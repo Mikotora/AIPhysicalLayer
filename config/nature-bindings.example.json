@@ -1,0 +1,24 @@
+{
+  "version": 1,
+  "appliances": {
+    "appliance.generic": "local-appliance-id",
+    "climate.room": "local-appliance-id",
+    "light.room": "local-appliance-id",
+    "climate.living_room": "local-appliance-id",
+    "media.tv": "local-appliance-id",
+    "light.living_room": "local-appliance-id"
+  },
+  "signals": {
+    "light.room.cycle": "local-signal-id",
+    "light.living_room.mode.reading": "local-signal-id",
+    "light.living_room.mode.dining": "local-signal-id",
+    "light.living_room.mode.relaxing": "local-signal-id",
+    "appliance.generic.dehumidify.high": "local-signal-id",
+    "appliance.generic.dehumidify.normal": "local-signal-id",
+    "appliance.generic.dehumidify.low": "local-signal-id",
+    "appliance.generic.laundry": "local-signal-id",
+    "appliance.generic.high_power": "local-signal-id",
+    "appliance.generic.heat_sterilize": "local-signal-id",
+    "appliance.generic.filter_clean": "local-signal-id"
+  }
+}

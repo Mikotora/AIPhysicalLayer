@@ -1,0 +1,16 @@
+#!/bin/sh
+set -eu
+
+project_root=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+bundled_node="${HOME}/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node"
+
+if [ -x "$bundled_node" ]; then
+  node_binary="$bundled_node"
+elif command -v node >/dev/null 2>&1; then
+  node_binary=$(command -v node)
+else
+  echo "Node.js 24 or later is required" >&2
+  exit 1
+fi
+
+exec "$node_binary" "$project_root/scripts/service.ts" "$@"
